@@ -1,4 +1,4 @@
-# This is README file for the simple stock API server
+# Simple stock price tracker
 
 ## Motivation
 I was frustrated not being able to find simple email notifications for stock prices so I made my own script to track the stocks I like.
