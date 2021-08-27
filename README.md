@@ -23,4 +23,4 @@ python 3, dotenv, logging, requests, smtplib
 
 3. If using Gmail client you will need to enable less secure apps: https://hotter.io/docs/email-accounts/secure-app-gmail/
 
-4. Create Rapid API account and get key from https://rapidapi.com/. Within Rapid API you need to subscribe to realstonks.
+4. Create Rapid API account and get key from https://rapidapi.com/. Within Rapid API you need to subscribe to realstonks stock price information provider.
