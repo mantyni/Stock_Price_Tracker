@@ -5,6 +5,8 @@ I was frustrated not being able to find simple email notifications for stock pri
 Existing stock news apps sometimes fail to notify about important stock movements (think AMC and GME). 
 Additionally, the notificaiton within the app on the phone can easily get lost, missed, but email message will not. 
 
+![Alt text](images/screenshot.png?raw=true "StockPriceServer")
+
 ## Requirements
 python 3
 dotenv
