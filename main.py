@@ -1,22 +1,24 @@
+#!/usr/bin/env python3
+
 # Subscribes to Rapid API for stock price, read it every 20 min.
 # Sends email if stock price significantly changed.
 
-import requests
 import json
 import time
 import datetime
 import os
+
+# For storing passwords and sensitive data as environment variables
 from dotenv import load_dotenv
 
-# Sending email
+# For sending email
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# Retry if connection errors happen
+# For retring HRRP requests if connection errors happen
 import logging
 import requests
-
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -26,24 +28,15 @@ s = requests.Session()
 retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
 s.mount('https://', HTTPAdapter(max_retries=retries))
 
-# Load env variables
+# Load env variables  
 load_dotenv('.env')
-
-# Receive stock quote price via Rapid API interface http request
-# Change AMC to another stock if needed, for eg. GME, BB, TSLA
-url = "https://realstonks.p.rapidapi.com/AMC"
-
-headers = {
-    'x-rapidapi-key': os.getenv('API_KEY'),
-    'x-rapidapi-host': "realstonks.p.rapidapi.com"
-    }
 
 
 # Safely access email and password details from .env file
 class Envs:
     SENDER_EMAIL = os.getenv('SENDER_EMAIL')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    RECEIVER_EMAIL = os.getenv('RECEIVER_EMAIL')
+    RECEIVER_EMAIL = os.getenv('RECEIVER_EMAIL') # To send to multiple recipients use "john.doe@example.com,john.smith@example.co.uk" in .env.
 
 
 # Send email with formatted message either in text or html
@@ -83,43 +76,57 @@ def sendMail(stockPrice, changePercentage):
     print("Message sent")
 
 
-# Initialise vairiables
-t1 = 0
-period = 900 # Check stock price every 15 minutes
-sleep_seconds = (300)
-price = 1 
-changeP = 1 # Stock change percentage
+# Receive stock quote price via Rapid API interface http request
+# Change AMC to another stock if needed, for eg. GME, BB, TSLA
+url = "https://realstonks.p.rapidapi.com/AMC"
 
-print()
-print("## Subscribing to AMC stock price via API. ##")
-print()
+headers = {
+    'x-rapidapi-key': os.getenv('API_KEY'),
+    'x-rapidapi-host': "realstonks.p.rapidapi.com"
+    }
+
 
 # Main while loop
-while True:
-    
-    t = time.time()
+def main():
+    print("\n## Subscribing to AMC stock price via API. ##\n")
 
-    if t-t1 >= period:
-        response = s.get(url=url, headers=headers) # Request stock data
+    # Initialise vairiables
+    t1 = 0 # 2nd time point (t-t1) 
+    period = 900 # Check stock price every 15 minutes
+    sleep_seconds = 300 
+    price = 1 
+    change = 1 # Stock change percentage
 
-        if response.ok:
-            data = response.json() # Convert to html data to JSON  
-            output = json.loads(data)
-            new_price = output['price'] # New stock price
-            now = datetime.datetime.now() 
-            print("Current AMC price is: ", new_price, " -- ", now.strftime("%Y-%m-%d %H:%M:%S"))
-            changeP = abs(new_price/price)
-        else: 
-            print("DEBUG: Response not OK")
+    while True:
+        
+        t = time.time()
 
-        t1 = time.time()
+        # If specified time period passed then get stock price
+        if t-t1 >= period:
+            response = s.get(url=url, headers=headers) # Request stock data
 
-        # If stock has moved more than 10% then send mail to notify
-        if changeP >= 1.1 or changeP <= 0.9:
-            price = new_price
-            print("New AMC price is: ", price, " -- ", now.strftime("%Y-%m-%d %H:%M:%S"))
-            sendMail(price, changeP)
+            if response.ok:
+                data = response.json() # Convert to html data to JSON  
+                output = json.loads(data)
+                new_price = output['price'] # New stock price
+                now = datetime.datetime.now() 
+                print("Current AMC price is: ", new_price, " -- ", now.strftime("%Y-%m-%d %H:%M:%S"))
+                change = abs(new_price/price)
+            else: 
+                print("DEBUG: Response not OK")
 
-    time.sleep(sleep_seconds)
+            t1 = time.time()
+
+            # If stock has moved more than 10% then send email to notify
+            if change >= 1.1 or change <= 0.9:
+                price = new_price # Overwrite old stock price
+                print("New AMC price is: ", price, " -- ", now.strftime("%Y-%m-%d %H:%M:%S"))
+                sendMail(price, change)
+
+        time.sleep(sleep_seconds) # Sleep to save system resources
+
+
+if __name__ == '__main__':
+    main()
 
 
