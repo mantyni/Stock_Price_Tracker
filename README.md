@@ -1,9 +1,10 @@
 # This is README file for stock API server
 
 ## Introduction
-I was frustrated not being able to find simple email notifications for stock prices so I made my own script for this.
-Existing stock news apps sometimes fail to notify about important stock movements (think AMC and GME). 
-Additionally, the notificaiton within the app on the phone can easily get lost, missed, but email message will not. 
+I was frustrated not being able to find simple email notifications for stock prices so I made my own script to track the stocks I like.
+Additionally, I have observed that notifications within the third-party apps can easily get lost in the phone screen and missed, but if you receive email it will be clearly visible.
+Finally, existing stock news apps sometimes fail to deliver about important stock movements and it is really tiresome to be checking the stock ticker every day tracking price action (AMC and GME ape investors would relate to this). 
+
 
 ![Alt text](images/screenshot.png?raw=true "StockPriceServer")
 
