@@ -1,6 +1,6 @@
-# This is README file for stock API server
+# This is README file for the simple stock API server
 
-## Introduction
+## Motivation
 I was frustrated not being able to find simple email notifications for stock prices so I made my own script to track the stocks I like.
 
 Additionally, I have observed that notifications within the third-party apps can easily get lost in the phone screen and missed, but if you receive email it will be clearly visible.
@@ -11,11 +11,7 @@ Finally, existing stock news apps sometimes fail to deliver about important stoc
 ![Alt text](images/screenshot.png?raw=true "StockPriceServer")
 
 ## Requirements
-python 3
-dotenv
-logging
-requests
-smtplib
+python 3, dotenv, logging, requests, smtplib
 
 ## Instructions how to use: 
 1. On a high level, there is just main.py and .env file.<br />
