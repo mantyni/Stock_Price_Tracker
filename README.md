@@ -1,11 +1,11 @@
-# Simple stock price tracker
+# Stock Price Tracker
 
 ## Motivation
-I was frustrated not being able to find simple email notifications for stock prices so I made my own script to track the stocks I like.
+I was frustrated with not being able to find simple email based notifications of stock prices, so I made my own script to track the stocks that I like.
 
 Additionally, I have observed that notifications within the third-party apps can easily get lost in the phone screen and missed, but if you receive email it will be clearly visible.
 
-Finally, existing stock news apps sometimes fail to deliver about important stock movements and it is really tiresome to be checking the stock ticker every day tracking price action (AMC and GME ape investors would relate to this). 
+Finally, existing stock news apps sometimes fail to deliver about important stock movements and it is really tiresome to be checking the stock ticker every day tracking price action (AMC and GME investors would relate to this). 
 
 
 ![Alt text](images/screenshot.png?raw=true "StockPriceServer")
