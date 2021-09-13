@@ -1,7 +1,7 @@
 # Stock Price Tracker
 
 ## Introduction
-This is a server developed using FastAPI for subscribing / unsubscribing clients for retreiving stock prices from RapidAPI with HTTP requests and sending email notifications to subscribers using python smtp.
+This is a server developed using FastAPI for subscribing / unsubscribing clients from stock prices notifications. Prices are retreived from RapidAPI via HTTP requests and email notifications to subscribers are sent using python smtp.
 
 ## Motivation
 I was frustrated with not being able to find simple email based notifications of stock prices, so I made my own script to track the stocks that I like.
@@ -11,15 +11,15 @@ Additionally, I have observed that notifications within the third-party apps can
 Finally, existing stock news apps sometimes fail to deliver about important stock movements and it is really tiresome to be checking the stock ticker every day tracking price action (AMC and GME investors would relate to this). 
 
 
-Shell:
+#### Shell:
 
 ![Alt text](images/screenshot.png?raw=true "commandline")
 
-Localhost browser window:
+#### Localhost browser window:
 
 ![Alt text](images/screenshot1.png?raw=true "browser_window")
 
-FatAPI docs:
+#### FatAPI docs:
 
 ![Alt text](images/screenshot2.png?raw=true "fastapi_swagger")
 
