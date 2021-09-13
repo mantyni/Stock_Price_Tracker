@@ -143,7 +143,7 @@ def sendMail(stockPrice, changePercentage):
 
     RECEIVER_EMAIL = get_user_emails() # TODO review
 
-    print("Sending message")
+    print("Sending message to subscribers")
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "AMC is: " + str(stockPrice)
@@ -181,7 +181,7 @@ def sendMail(stockPrice, changePercentage):
 # Stock price reading bot
 async def readStocks():
 
-    # Initialise vairiables
+    await asyncio.sleep(5)     # Initialise vairiables
     t1 = 0 # 2nd time point (t-t1) 
     period = 5 # Check stock price every 15 minutes
     sleep_seconds = 1 
