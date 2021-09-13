@@ -14,8 +14,7 @@ def remove_user(db: Session, email: str):
     user = db.query(models.User).filter(models.User.email == email).first()
     db.delete(user)
     return db.commit()
-    #return db.query(models.User).filter(models.User.email == email).delete()
-
+    
 
 def create_user(db: Session, user: schemas.UserBase):
     db_user = models.User(**user.dict())

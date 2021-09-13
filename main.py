@@ -1,4 +1,5 @@
-# DESCRIPTION
+# Server based on FastAPI to retreive stock prices and send notification to subscribers
+# Allows to subscribe and unsubscribe emails, saves them in a local database 
 
 import os
 import asyncio
@@ -6,7 +7,6 @@ import crud, models, schemas
 import json
 import time
 import datetime
-
 from uvicorn import *
 from fastapi import FastAPI, Request, Depends, FastAPI, HTTPException
 from database import SessionLocal, engine
@@ -33,11 +33,12 @@ from starlette.responses import RedirectResponse
 
 models.Base.metadata.create_all(bind=engine)
 
+# Uncomment to remove access to docs
 #app = FastAPI(docs_url=None, redoc_url=None)
 
 app = FastAPI()
 
-db1 = SessionLocal()
+db1 = SessionLocal() # Needed for retreiving subscriber emails directly from databse
 
 def get_db():
     db = SessionLocal()
@@ -47,16 +48,26 @@ def get_db():
         db.close()
 
 
-
 logging.basicConfig(level=logging.DEBUG)
 
+
+# HTTP requests session enabling retries in case endpoint is down
 s = requests.Session()
 retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
 s.mount('https://', HTTPAdapter(max_retries=retries))
 
-# Load env variables  
-load_dotenv('.env')
 
+# RealStonks rapid api endpoint
+url = "https://realstonks.p.rapidapi.com/AMC"
+
+headers = {
+    'x-rapidapi-key': os.getenv('API_KEY'),
+    'x-rapidapi-host': "realstonks.p.rapidapi.com"
+    }
+
+
+# Load env variables for email credentials
+load_dotenv('.env')
 
 
 # Create a new user -> subscriber
@@ -64,8 +75,9 @@ load_dotenv('.env')
 def create_user(user: schemas.UserBase, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email already subscribed")
     return crud.create_user(db=db, user=user)
+
 
 # Remove User
 @app.post("/remove/", response_model=schemas.User)
@@ -75,47 +87,38 @@ def remove_subscriber(user: schemas.UserBase, db: Session = Depends(get_db)):
         return crud.remove_user(db=db, email=user.email)
 
 
-#@app.post("/users1")
-#async def root(request: Request):
-#    return {"received_request_body": await request.body()}
-
-# JSON conversion functions
+# add subscriber JSON conversion functions
+# TODO review
 @app.post("/users1")
 def subscriber(email: str = Form(...)):
 #    return {"email": email}
-    url = "http://localhost:8000/users"
+    url = "http://localhost:8000/users/"
     data = {'email': email}
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     r = requests.post(url, data=json.dumps(data), headers=headers)
     return r.status_code
     
-    
+
+# Remove subscriber, JSON conversion 
+# TODO add redirect back to homepage     
 @app.post("/users2")
 def subscriber(email: str = Form(...)):
-    #return {"email": email}
     url = "http://localhost:8000/remove"
     data = {'email': email}
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     r = requests.post(url, data=json.dumps(data), headers=headers)
     print("removing user")
     return r.status_code
-    #return RedirectResponse("/")
 
     
-# Get users
+# Read all users
 @app.get("/users/", response_model=List[schemas.User])
 def read_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
-#    user_list = ""
-#    for x in users:
-#        print(x.email)
-#        user_list += str(x.email)
-#        user_list += ","
-#    user_list = user_list[:-1]
-#    RECEIVER_EMAIL = get_user_emails()
     return users
 
-# Get emails as a string
+
+# Assemble all emails into a string for sending via smtp
 def get_user_emails():
     users = crud.get_users(db1)
     user_list = ""
@@ -127,15 +130,6 @@ def get_user_emails():
     return user_list
 
 
-url = "https://realstonks.p.rapidapi.com/AMC"
-
-headers = {
-    'x-rapidapi-key': os.getenv('API_KEY'),
-    'x-rapidapi-host': "realstonks.p.rapidapi.com"
-    }
-
-
-##### Send email
 
 # Safely access email and password details from .env file
 class Envs:
@@ -147,7 +141,7 @@ class Envs:
 
 def sendMail(stockPrice, changePercentage):
 
-    RECEIVER_EMAIL = get_user_emails()
+    RECEIVER_EMAIL = get_user_emails() # TODO review
 
     print("Sending message")
 
@@ -183,17 +177,17 @@ def sendMail(stockPrice, changePercentage):
 
     print("Message sent")
 
-# Bot:
-async def test():
 
-# Initialise vairiables
+# Stock price reading bot
+async def readStocks():
+
+    # Initialise vairiables
     t1 = 0 # 2nd time point (t-t1) 
     period = 5 # Check stock price every 15 minutes
     sleep_seconds = 1 
     price = 1 
     change = 1 # Stock change percentage
     
-
     while True:
         
         t = time.time()
@@ -222,10 +216,10 @@ async def test():
                 sendMail(price, change)
 
         await asyncio.sleep(sleep_seconds) 
-        #time.sleep(sleep_seconds) # Sleep to save system resources
 
 
-
+# Homepage 
+# TODO: implement html template
 @app.route("/")
 def form(request):
     return HTMLResponse(
@@ -244,24 +238,25 @@ def form(request):
         </form>
     """)
 
+
 @app.route("/form")
 def redirect_to_homepage(request):
     return RedirectResponse("/")
     
 
+# Separate event loop for retreaving stock prices
 loop = asyncio.get_event_loop()
-
 config = Config(app=app, loop=loop)
 server = Server(config)
 #loop.run_until_complete(server.serve())
-loop.create_task(test())
+loop.create_task(readStocks())
 
 
 def main():
     run(
         "main:app",
         host='0.0.0.0',
-    port=int(os.environ.get('PORT', 8000)),
+        port=int(os.environ.get('PORT', 8000)),
     )
     
     
