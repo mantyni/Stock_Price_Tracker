@@ -5,13 +5,11 @@ from pydantic import BaseModel
 
 class UserBase(BaseModel):
     email: str
-    user_id: Optional[str]
 
 
 class User(UserBase):
     id: int
     email: str
-    user_id: Optional[str]
 
     class Config:
         orm_mode = True

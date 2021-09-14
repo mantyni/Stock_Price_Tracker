@@ -8,4 +8,3 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True)
-    user_id = Column(String(255), unique=True, index=True)

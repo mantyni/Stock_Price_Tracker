@@ -36,8 +36,9 @@ Finally, existing stock news apps sometimes fail to deliver about important stoc
 * sqlalchemy
 * smtplib 
 
+
 ## Instructions how to use: 
-1. To start the server: `python3 main.py`<br />
+1. To use and start the server clone the repository and execute: `python3 main.py`<br />
    
 
 2. Replace password and email variables in .env file:<br />
